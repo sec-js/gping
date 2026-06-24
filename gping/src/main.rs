@@ -2,9 +2,9 @@ use crate::plot_data::PlotData;
 use anyhow::{anyhow, bail, Context, Result};
 use chrono::prelude::*;
 use clap::{CommandFactory, Parser};
-use crossterm::event::KeyModifiers;
-use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
-use crossterm::{
+use tui::crossterm::event::KeyModifiers;
+use tui::crossterm::terminal::{Clear, ClearType, EnterAlternateScreen, LeaveAlternateScreen};
+use tui::crossterm::{
     event::{self, Event as CEvent, KeyCode},
     execute,
     terminal::{disable_raw_mode, enable_raw_mode, SetSize},
@@ -458,7 +458,8 @@ fn main() -> Result<()> {
     }
 
     let mut terminal = Terminal::new(backend)?;
-    terminal.clear()?;
+    // terminal.clear() requires reading the cursor position, which fails in some CI environments.
+    execute!(terminal.backend_mut(), Clear(ClearType::All))?;
 
     // Pump keyboard messages into the queue
     let killed_thread = std::sync::Arc::clone(&killed);
